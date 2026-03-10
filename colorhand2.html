@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculateur d'Abrasion - Paume Divisée</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; background: #eceff1; color: #333; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 40px; text-align: center; }
+        svg { cursor: pointer; max-width: 350px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        
+        /* Styles des zones */
+        path { fill: #f0f0f0; stroke: #999; stroke-width: 1.5; transition: all 0.2s ease; }
+        path:hover { fill: #d1d8e0; stroke: #555; }
+        path.selected { fill: #ff4757; stroke: #c0392b; }
+        
+        .result-box { margin-top: 20px; padding: 15px; border-top: 2px solid #eee; }
+        .total-val { font-size: 2rem; font-weight: bold; color: #ff4757; }
+        .unit { font-size: 1rem; color: #777; }
+        h2 { margin-bottom: 5px; color: #2c3e50; }
+        p { color: #7f8c8d; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Évaluation de l'Abrasion</h2>
+    <p>Cliquez sur les zones de la paume ou des doigts impactés</p>
+
+    <svg viewBox="0 0 200 250" id="hand-svg">
+        <path d="M40,80 Q40,30 55,30 Q70,30 70,80 L70,110 L40,110 Z" data-area="18" title="Index" />
+        <path d="M75,70 Q75,10 90,10 Q105,10 105,70 L105,110 L75,110 Z" data-area="20" title="Majeur" />
+        <path d="M110,80 Q110,30 125,30 Q140,30 140,80 L140,110 L110,110 Z" data-area="17" title="Annulaire" />
+        <path d="M145,100 Q145,60 155,60 Q165,60 165,100 L165,130 L145,130 Z" data-area="12" title="Auriculaire" />
+        <path d="M15,145 Q5,135 25,115 Q45,105 55,135 L45,165 Z" data-area="15" title="Pouce" />
+        
+        <path d="M40,110 L100,115 L100,165 L45,165 Z" data-area="21" title="Paume Supéro-Externe" />
+        <path d="M100,115 L165,130 L162,175 L100,165 Z" data-area="21" title="Paume Supéro-Interne" />
+        <path d="M45,165 L100,165 L100,230 Q70,235 40,220 Z" data-area="21" title="Paume Inféro-Externe" />
+        <path d="M100,165 L162,175 L158,220 Q130,235 100,230 Z" data-area="21" title="Paume Inféro-Interne" />
+    </svg>
+
+    <div class="result-box">
+        <span class="total-val" id="total-area">0</span> <span class="unit">cm²</span>
+        <div style="font-size: 0.8rem; margin-top: 10px;">
+            (Basé sur une surface moyenne masculine de 180 cm²)
+        </div>
+    </div>
+    <button onclick="reset()" style="margin-top:15px; cursor:pointer;">Réinitialiser</button>
+</div>
+
+<script>
+    const display = document.getElementById('total-area');
+    let totalArea = 0;
+
+    document.querySelectorAll('path').forEach(path => {
+        path.addEventListener('click', () => {
+            const area = parseFloat(path.getAttribute('data-area'));
+            
+            if (path.classList.contains('selected')) {
+                path.classList.remove('selected');
+                totalArea -= area;
+            } else {
+                path.classList.add('selected');
+                totalArea += area;
+            }
+            display.textContent = Math.max(0, totalArea).toFixed(1);
+        });
+    });
+
+    function reset() {
+        document.querySelectorAll('.selected').forEach(p => p.classList.remove('selected'));
+        totalArea = 0;
+        display.textContent = "0";
+    }
+</script>
+
+</body>
+</html>
