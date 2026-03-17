@@ -5,10 +5,9 @@
     <title>Calculateur d'Abrasion - Paume Divisée</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; background: #eceff1; color: #333; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 40px; text-align: center; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 40px; text-align: center; max-width: 450px; width: 100%; }
         svg { cursor: pointer; max-width: 350px; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         
-        /* Styles des zones */
         path { fill: #f0f0f0; stroke: #999; stroke-width: 1.5; transition: all 0.2s ease; }
         path:hover { fill: #d1d8e0; stroke: #555; }
         path.selected { fill: #ff4757; stroke: #c0392b; }
@@ -18,6 +17,26 @@
         .unit { font-size: 1rem; color: #777; }
         h2 { margin-bottom: 5px; color: #2c3e50; }
         p { color: #7f8c8d; margin-bottom: 20px; }
+
+        .btn { 
+            cursor: pointer; padding: 10px 24px; border: none; border-radius: 8px; 
+            font-size: 0.95rem; font-weight: 600; transition: all 0.2s; margin: 5px;
+        }
+        .btn-reset { background: #e0e0e0; color: #555; }
+        .btn-reset:hover { background: #ccc; }
+        .btn-submit { background: #2ecc71; color: white; }
+        .btn-submit:hover { background: #27ae60; }
+        .btn-submit:disabled { background: #aaa; cursor: not-allowed; }
+
+        .status-msg {
+            margin-top: 12px; padding: 10px; border-radius: 8px; font-size: 0.9rem;
+            display: none;
+        }
+        .status-msg.success { display: block; background: #e8f5e9; color: #2e7d32; }
+        .status-msg.error { display: block; background: #ffebee; color: #c62828; }
+        .status-msg.loading { display: block; background: #e3f2fd; color: #1565c0; }
+
+        .buttons { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
     </style>
 </head>
 <body>
@@ -27,16 +46,16 @@
     <p>Cliquez sur les zones de la paume ou des doigts impactés</p>
 
     <svg viewBox="0 0 200 250" id="hand-svg">
-        <path d="M40,80 Q40,30 55,30 Q70,30 70,80 L70,110 L40,110 Z" data-area="18" title="Index" />
-        <path d="M75,70 Q75,10 90,10 Q105,10 105,70 L105,110 L75,110 Z" data-area="20" title="Majeur" />
-        <path d="M110,80 Q110,30 125,30 Q140,30 140,80 L140,110 L110,110 Z" data-area="17" title="Annulaire" />
-        <path d="M145,100 Q145,60 155,60 Q165,60 165,100 L165,130 L145,130 Z" data-area="12" title="Auriculaire" />
-        <path d="M15,145 Q5,135 25,115 Q45,105 55,135 L45,165 Z" data-area="15" title="Pouce" />
+        <path d="M40,80 Q40,30 55,30 Q70,30 70,80 L70,110 L40,110 Z" data-area="18" data-zone="Index" title="Index" />
+        <path d="M75,70 Q75,10 90,10 Q105,10 105,70 L105,110 L75,110 Z" data-area="20" data-zone="Majeur" title="Majeur" />
+        <path d="M110,80 Q110,30 125,30 Q140,30 140,80 L140,110 L110,110 Z" data-area="17" data-zone="Annulaire" title="Annulaire" />
+        <path d="M145,100 Q145,60 155,60 Q165,60 165,100 L165,130 L145,130 Z" data-area="12" data-zone="Auriculaire" title="Auriculaire" />
+        <path d="M15,145 Q5,135 25,115 Q45,105 55,135 L45,165 Z" data-area="15" data-zone="Pouce" title="Pouce" />
         
-        <path d="M40,110 L100,115 L100,165 L45,165 Z" data-area="21" title="Paume Supéro-Externe" />
-        <path d="M100,115 L165,130 L162,175 L100,165 Z" data-area="21" title="Paume Supéro-Interne" />
-        <path d="M45,165 L100,165 L100,230 Q70,235 40,220 Z" data-area="21" title="Paume Inféro-Externe" />
-        <path d="M100,165 L162,175 L158,220 Q130,235 100,230 Z" data-area="21" title="Paume Inféro-Interne" />
+        <path d="M40,110 L100,115 L100,165 L45,165 Z" data-area="21" data-zone="Paume Supéro-Externe" title="Paume Supéro-Externe" />
+        <path d="M100,115 L165,130 L162,175 L100,165 Z" data-area="21" data-zone="Paume Supéro-Interne" title="Paume Supéro-Interne" />
+        <path d="M45,165 L100,165 L100,230 Q70,235 40,220 Z" data-area="21" data-zone="Paume Inféro-Externe" title="Paume Inféro-Externe" />
+        <path d="M100,165 L162,175 L158,220 Q130,235 100,230 Z" data-area="21" data-zone="Paume Inféro-Interne" title="Paume Inféro-Interne" />
     </svg>
 
     <div class="result-box">
@@ -45,17 +64,30 @@
             (Basé sur une surface moyenne masculine de 180 cm²)
         </div>
     </div>
-    <button onclick="reset()" style="margin-top:15px; cursor:pointer;">Réinitialiser</button>
+
+    <div class="buttons">
+        <button class="btn btn-reset" onclick="reset()">Réinitialiser</button>
+        <button class="btn btn-submit" id="submitBtn" onclick="envoyer()">Envoyer les données</button>
+    </div>
+
+    <div class="status-msg" id="statusMsg"></div>
 </div>
 
 <script>
+    // ============================================================
+    // ⚠️ REMPLACE CETTE URL par l'URL de ton Google Apps Script
+    // ============================================================
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXxjId1ThLuTltrQseKz2kPcKgviss2Z99vCdyByicNwIUWhGpYH8-17BC5NUuSSi4/exec';
+
     const display = document.getElementById('total-area');
+    const statusMsg = document.getElementById('statusMsg');
+    const submitBtn = document.getElementById('submitBtn');
     let totalArea = 0;
 
+    // --- Sélection des zones ---
     document.querySelectorAll('path').forEach(path => {
         path.addEventListener('click', () => {
             const area = parseFloat(path.getAttribute('data-area'));
-            
             if (path.classList.contains('selected')) {
                 path.classList.remove('selected');
                 totalArea -= area;
@@ -71,6 +103,59 @@
         document.querySelectorAll('.selected').forEach(p => p.classList.remove('selected'));
         totalArea = 0;
         display.textContent = "0";
+        statusMsg.className = 'status-msg';
+        statusMsg.textContent = '';
+    }
+
+    // --- Envoi vers Google Sheets ---
+    async function envoyer() {
+        const selected = document.querySelectorAll('path.selected');
+        
+        if (selected.length === 0) {
+            statusMsg.className = 'status-msg error';
+            statusMsg.textContent = '⚠️ Sélectionnez au moins une zone.';
+            return;
+        }
+
+        // Récupérer les zones sélectionnées
+        const zones = [];
+        selected.forEach(path => {
+            zones.push(path.getAttribute('data-zone'));
+        });
+
+        const donnees = {
+            zones: zones.join(', '),
+            surface_cm2: Math.max(0, totalArea).toFixed(1),
+            nb_zones: zones.length
+        };
+
+        // Afficher le chargement
+        submitBtn.disabled = true;
+        statusMsg.className = 'status-msg loading';
+        statusMsg.textContent = '⏳ Envoi en cours...';
+
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(donnees)
+            });
+
+            // Avec no-cors on ne peut pas lire la réponse, mais l'envoi fonctionne
+            statusMsg.className = 'status-msg success';
+            statusMsg.textContent = '✅ Données envoyées avec succès !';
+            
+            // Reset après 2 secondes
+            setTimeout(() => { reset(); }, 2000);
+
+        } catch (error) {
+            statusMsg.className = 'status-msg error';
+            statusMsg.textContent = '❌ Erreur lors de l\'envoi. Réessayez.';
+            console.error('Erreur:', error);
+        } finally {
+            submitBtn.disabled = false;
+        }
     }
 </script>
 
